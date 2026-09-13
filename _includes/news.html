@@ -1,0 +1,131 @@
+<!--
+  NEWS SECTION
+  ============
+  Reads from _data/news.csv — open it in Excel or Google Sheets to add a
+  new item. Add ONE new row at the TOP (newest first), fill in:
+
+    date          e.g. "January 2026"
+    headline      short bold title, e.g. "Paper Accepted at PiCom 2026"
+    description   one or two plain sentences — no HTML needed
+    link1_text    label for the first button, e.g. "PiCom 2026"  (optional)
+    link1_url     the URL for that button                        (optional)
+    link2_text    label for a second button, e.g. "Certificate"  (optional)
+    link2_url     the URL for that button                        (optional)
+    featured      put "1" here for your 2-3 most recent items —
+                  those are the ones shown on the Home page
+
+  Leave link2_text/link2_url empty if there's only one link.
+  You never type <a>, <b>, or any HTML tag — the template builds it all,
+  so a missing href= or an unclosed tag can no longer happen.
+-->
+<style>
+.news-section-head{
+  display:flex;align-items:center;gap:.5rem;
+  font-size:1.2rem;font-weight:900;color:#0f172a;
+  border-bottom:2px solid #e2e8f0;padding-bottom:.5rem;margin-bottom:1.4rem}
+.news-section-head::before{content:"";display:inline-block;
+  width:4px;height:1.1rem;border-radius:2px;background:#0d9488}
+
+.news-wrap{display:flex;flex-direction:column;gap:0}
+.news-item{display:flex;flex-direction:row;gap:0;align-items:stretch}
+.news-left{display:flex;flex-direction:column;align-items:center;
+  width:40px;flex-shrink:0;padding-top:18px}
+.news-dot{width:13px;height:13px;border-radius:50%;
+  background:#fff;border:2.5px solid #0d9488;flex-shrink:0;z-index:1}
+.news-line{flex:1;width:2px;background:#e2e8f0;margin-top:4px;min-height:16px}
+.news-item:last-child .news-line{background:transparent}
+
+.news-card{flex:1;margin:10px 0 6px 12px;padding:.8rem 1rem;
+  border-radius:12px;background:#fff;border:1px solid #e9eef3;
+  box-shadow:0 2px 10px rgba(0,0,0,.04);
+  transition:border-color .15s,box-shadow .15s}
+.news-card:hover{border-color:#99f6e4;box-shadow:0 6px 18px rgba(13,148,136,.08)}
+.news-date{font-size:.72rem;font-weight:800;color:#0d9488;
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
+.news-headline{font-size:.97rem;font-weight:800;color:#0f172a;
+  margin:0 0 .25rem;line-height:1.4}
+.news-desc{font-size:.88rem;color:#4b5563;line-height:1.6;margin:0 0 .5rem}
+.news-btns{display:flex;flex-wrap:wrap;gap:.4rem}
+.news-btn{display:inline-flex;align-items:center;gap:.3rem;
+  padding:.35rem .65rem;border-radius:999px;font-weight:700;font-size:.8rem;
+  border:1px solid #c7d2fe;background:#eef2ff;color:#3730a3;
+  text-decoration:none;transition:transform .12s,box-shadow .12s}
+.news-btn:hover{transform:translateY(-1px);box-shadow:0 5px 10px rgba(0,0,0,.07)}
+.news-btn.cert{background:#ecfdf5;border-color:#6ee7b7;color:#065f46}
+
+.news-all-link{margin-top:.4rem;padding-left:52px}
+.news-all-link a{font-weight:700;color:#0d9488;font-size:.9rem;text-decoration:none;
+  display:inline-flex;align-items:center;gap:.3rem}
+.news-all-link a:hover{color:#0f766e;text-decoration:underline}
+
+.news-more-wrap{text-align:center;margin:.6rem 0}
+.news-more-btn{display:inline-flex;align-items:center;gap:.4rem;
+  padding:.48rem 1.2rem;border-radius:999px;font-weight:700;font-size:.86rem;
+  background:#f0fdfa;border:1.5px solid #99f6e4;color:#0f766e;
+  cursor:pointer;transition:all .15s}
+.news-more-btn:hover{background:#0d9488;color:#fff;border-color:#0d9488;
+  box-shadow:0 4px 14px rgba(13,148,136,.25)}
+.news-hidden{display:none !important}
+
+@media(max-width:640px){
+  .news-left{width:30px}
+  .news-card{font-size:.87rem;padding:.65rem .8rem;margin-left:8px}
+  .news-all-link{padding-left:38px}
+}
+</style>
+
+{% if page.title == "Home" %}
+<div class="news-section-head">📰 Latest News</div>
+<div class="news-wrap">
+  {% assign featured_news = site.data.news | where: "featured", "1" %}
+  {% for item in featured_news %}
+  <div class="news-item">
+    <div class="news-left"><div class="news-dot"></div><div class="news-line"></div></div>
+    <div class="news-card">
+      <div class="news-date">{{ item.date | strip }}</div>
+      <p class="news-headline">{{ item.headline | strip }}</p>
+      {% assign desc = item.description | strip %}
+      {% if desc != "" %}<p class="news-desc">{{ desc }}</p>{% endif %}
+      <div class="news-btns">
+        {% assign l1u = item.link1_url | strip %}
+        {% if l1u != "" %}<a class="news-btn" href="{{ l1u }}" target="_blank" rel="noopener">{{ item.link1_text | strip | default: "Link" }}</a>{% endif %}
+        {% assign l2u = item.link2_url | strip %}
+        {% if l2u != "" %}<a class="news-btn cert" href="{{ l2u }}" target="_blank" rel="noopener">{{ item.link2_text | strip | default: "Link" }}</a>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="news-all-link"><a href="{{ site.github.url }}/news">→ All news</a></div>
+
+{% else %}
+<div class="news-section-head">📰 News</div>
+<div class="news-wrap" id="news-list">
+  {% for item in site.data.news %}
+  <div class="news-item{% if forloop.index > 5 %} news-hidden{% endif %}">
+    <div class="news-left"><div class="news-dot"></div><div class="news-line"></div></div>
+    <div class="news-card">
+      <div class="news-date">{{ item.date | strip }}</div>
+      <p class="news-headline">{{ item.headline | strip }}</p>
+      {% assign desc = item.description | strip %}
+      {% if desc != "" %}<p class="news-desc">{{ desc }}</p>{% endif %}
+      <div class="news-btns">
+        {% assign l1u = item.link1_url | strip %}
+        {% if l1u != "" %}<a class="news-btn" href="{{ l1u }}" target="_blank" rel="noopener">{{ item.link1_text | strip | default: "Link" }}</a>{% endif %}
+        {% assign l2u = item.link2_url | strip %}
+        {% if l2u != "" %}<a class="news-btn cert" href="{{ l2u }}" target="_blank" rel="noopener">{{ item.link2_text | strip | default: "Link" }}</a>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% assign news_total = site.data.news | size %}
+{% if news_total > 5 %}
+<div class="news-more-wrap">
+  <button class="news-more-btn" type="button"
+    onclick="document.querySelectorAll('#news-list .news-item.news-hidden').forEach(function(el){el.classList.remove('news-hidden')});this.style.display='none'">
+    Show all news ({{ news_total | minus: 5 }} more) ↓
+  </button>
+</div>
+{% endif %}
+{% endif %}
